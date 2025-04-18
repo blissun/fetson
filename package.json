@@ -1,0 +1,43 @@
+{
+  "name": "fetson",
+  "version": "0.1.0",
+  "description": "타입 안전성, 미들웨어 확장성을 모두 갖춘 초경량 HTTP 클라이언트",
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "biome lint ./src",
+    "format": "biome format --write ./src",
+    "check": "biome check --apply ./src",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "fetch",
+    "http",
+    "typescript",
+    "api",
+    "client",
+    "request"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^20.17.30",
+    "typescript": "~5.7.2",
+    "vite": "^6.3.1",
+    "vite-plugin-dts": "^3.9.1",
+    "vitest": "^1.6.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
