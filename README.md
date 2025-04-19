@@ -1,21 +1,87 @@
-# fetson
+# Fetson
 
-**fetson**는 타입 안전성, 미들웨어 확장성을 모두 갖춘 초경량 HTTP 클라이언트입니다.
+**Fetson** is a lightweight HTTP client with complete type safety for TypeScript.
 
-## 예시 사용법
-```typescript
-import { fs } from 'fetson';
+## Installation
 
-// 타입 지정 예시
-type User = { id: string; name: string };
-
-const user = await fs.post<User>('https://petstore.swagger.io/v2/pet', { name: 'Tom' });
-const users = await fs.get<User[]>('https://petstore.swagger.io/v2/pet/findByStatus', { params: { status: 'available' } });
-const user = await fs.put<User>('https://petstore.swagger.io/v2/pet', { name: 'Tom' });
-const user = await fs.delete<User>('https://petstore.swagger.io/v2/pet/1');
-const user = await fs.patch<User>('https://petstore.swagger.io/v2/pet', { name: 'Tom' });
-
+```bash
+npm install fetson
 ```
 
-## 라이선스
-MIT
+## Basic Usage
+
+```typescript
+import { fetson } from 'fetson';
+
+// Type definition example
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
+
+// GET request example
+const users = await fetson.get<User[]>('https://api.example.com/users');
+
+// POST request example
+const newUser = await fetson.post<User>('https://api.example.com/users', {
+  name: 'John',
+  email: 'john@example.com'
+});
+
+// PUT request example
+const updatedUser = await fetson.put<User>('https://api.example.com/users/1', {
+  name: 'John (Updated)'
+});
+
+// DELETE request example
+const deletedUser = await fetson.delete<User>('https://api.example.com/users/1');
+
+// PATCH request example
+const patchedUser = await fetson.patch<User>('https://api.example.com/users/1', {
+  name: 'New Name'
+});
+```
+
+## Custom Instance Creation
+
+```typescript
+import { Fetson } from 'fetson';
+
+// Create an instance with base URL and authentication
+const myApi = new Fetson({
+  baseURL: 'https://api.myservice.com',
+  headers: {
+    'Authorization': 'Bearer YOUR_TOKEN',
+    'Content-Type': 'application/json'
+  }
+});
+
+// Use the new instance for requests
+const data = await myApi.get('/resources');
+```
+
+## Type Safety
+
+Fetson implements complete type safety using TypeScript generics.
+
+```typescript
+// Interface definition
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+}
+
+// Get type-safe response
+const products = await fetson.get<Product[]>('/products');
+
+// Leverage all TypeScript benefits
+products.forEach(product => {
+  console.log(`${product.name}: $${product.price}`);
+});
+```
+
+## License
+
+MIT License
