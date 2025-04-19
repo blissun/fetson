@@ -1,7 +1,7 @@
 {
   "name": "fetson",
   "version": "0.1.0",
-  "description": "타입 안전성, 미들웨어 확장성을 모두 갖춘 초경량 HTTP 클라이언트",
+  "description": "A lightweight HTTP client with complete type safety for TypeScript",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -27,7 +27,7 @@
     "client",
     "request"
   ],
-  "author": "",
+  "author": "blissun",
   "license": "MIT",
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
