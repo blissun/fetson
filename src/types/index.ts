@@ -23,15 +23,15 @@ export interface FetsonConfig {
 // fetson 인스턴스 타입
 export interface FetsonInstance {
   // GET 요청
-  get(url: string,): Promise<any>;
+  get<T = any>(url: string): Promise<T>;
   // POST 요청
-  post(url: string, body?: any,): Promise<any>;
+  post<T = any, D = any>(url: string, body?: D): Promise<T>;
   // PUT 요청
-  put(url: string, body?: any,): Promise<any>;
+  put(url: string, body?: any): Promise<any>;
   // DELETE 요청
-  delete(url: string,): Promise<any>;
+  delete(url: string): Promise<any>;
   // PATCH 요청
-  patch(url: string, body?: any,): Promise<any>;
+  patch(url: string, body?: any): Promise<any>;
   // 일반 요청
-  request(method: HttpMethod, url: string,): Promise<any>;
+  request(method: HttpMethod, url: string): Promise<any>;
 }

@@ -20,7 +20,7 @@ class Fetson implements FetsonInstance {
     return `${this.baseURL}${url.startsWith('/') ? url : `/${url}`}`;
   }
   
-  async get(url: string): Promise<any> {
+  async get<T = any>(url: string): Promise<T> {
     const fullUrl = this.getFullUrl(url);
     
     const response = await fetch(fullUrl, {
@@ -32,10 +32,10 @@ class Fetson implements FetsonInstance {
       throw new Error(`HTTP 에러: ${response.status}`);
     }
     
-    return response.json();
+    return response.json() as Promise<T>;
   }
   
-  async post(url: string, body?: any): Promise<any> {
+  async post<T = any, D = any>(url: string, body?: D): Promise<T> {
     const fullUrl = this.getFullUrl(url);
     
     // 기본 헤더 설정
@@ -54,7 +54,7 @@ class Fetson implements FetsonInstance {
       throw new Error(`HTTP 에러: ${response.status}`);
     }
     
-    return response.json();
+    return response.json() as Promise<T>;
   }
   
   async put(url: string, body?: any): Promise<any> {
