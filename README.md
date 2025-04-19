@@ -11,7 +11,7 @@ npm install fetson
 ## Basic Usage
 
 ```typescript
-import { fetson } from 'fetson';
+import { fetson } from "fetson";
 
 // Type definition example
 interface User {
@@ -20,45 +20,43 @@ interface User {
   email: string;
 }
 
-// GET request example
-const users = await fetson.get<User[]>('https://api.example.com/users');
+// GET
+const users = await fetson.get<User[]>("https://api.example.com/users");
 
-// POST request example
-const newUser = await fetson.post<User>('https://api.example.com/users', {
-  name: 'John',
-  email: 'john@example.com'
+// POST
+const newUser = await fetson.post<User>("https://api.example.com/users", {
+  name: "John",
+  email: "James@example.com",
 });
 
-// PUT request example
-const updatedUser = await fetson.put<User>('https://api.example.com/users/1', {
-  name: 'John (Updated)'
+// PUT
+const updatedUser = await fetson.put<User>("https://api.example.com/users/123", {
+  name: "James",
+  email: "James@cacao.com",
 });
 
-// DELETE request example
-const deletedUser = await fetson.delete<User>('https://api.example.com/users/1');
-
-// PATCH request example
-const patchedUser = await fetson.patch<User>('https://api.example.com/users/1', {
-  name: 'New Name'
+// PATCH
+const patchedUser = await fetson.patch<User>("https://api.example.com/users/123", {
+  name: "Jameson",
 });
+
+// DELETE
+await fetson.delete("https://api.example.com/users/123");
 ```
 
 ## Custom Instance Creation
 
 ```typescript
-import { Fetson } from 'fetson';
+import { Fetson } from "fetson";
 
 // Create an instance with base URL and authentication
-const myApi = new Fetson({
-  baseURL: 'https://api.myservice.com',
+const fs = new Fetson({
+  baseURL: "https://api.myservice.com",
   headers: {
-    'Authorization': 'Bearer YOUR_TOKEN',
-    'Content-Type': 'application/json'
-  }
+    Authorization: "Bearer YOUR_TOKEN",
+    "Content-Type": "application/json",
+  },
 });
-
-// Use the new instance for requests
-const data = await myApi.get('/resources');
 ```
 
 ## Type Safety
@@ -74,10 +72,10 @@ interface Product {
 }
 
 // Get type-safe response
-const products = await fetson.get<Product[]>('/products');
+const products = await fetson.get<Product[]>("/products");
 
 // Leverage all TypeScript benefits
-products.forEach(product => {
+products.forEach((product) => {
   console.log(`${product.name}: $${product.price}`);
 });
 ```
