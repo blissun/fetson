@@ -1,143 +1,26 @@
 import { FetsonConfig, FetsonInstance, HttpMethod, Headers } from "../types";
+import { HttpError } from "./HttpError";
 
 class Fetson implements FetsonInstance {
   private baseURL: string;
+  private defaultHeaders: Record<string, string>;
 
   constructor(config: FetsonConfig = {}) {
     this.baseURL = config.baseURL || "";
     this.defaultHeaders = config.defaultHeaders || {};
   }
 
-  private defaultHeaders: Record<string, string>;
-
   private getFullUrl(url: string): string {
-    // 이미 완전한 URL인 경우
     if (url.startsWith("http")) {
       return url;
     }
 
-    // 경로 합치기
-    return `${this.baseURL}${url.startsWith("/") ? url : `/${url}`}`;
-  }
+    const trimmedBaseURL = this.baseURL.endsWith("/")
+      ? this.baseURL.slice(0, -1)
+      : this.baseURL;
+    const trimmedUrl = url.startsWith("/") ? url.slice(1) : url;
 
-  async get<T = any>(url: string, headers?: Headers): Promise<T> {
-    const fullUrl = this.getFullUrl(url);
-
-    // 사용자 헤더와 기본 헤더 병합
-    const mergedHeaders = {
-      ...this.defaultHeaders,
-      ...(headers || {}),
-    };
-
-    const response = await fetch(fullUrl, {
-      method: "GET",
-      headers: mergedHeaders,
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP 에러: ${response.status}`);
-    }
-
-    return response.json() as Promise<T>;
-  }
-
-  async post<T = any, D = any>(
-    url: string,
-    body?: D,
-    headers?: Headers
-  ): Promise<T> {
-    const fullUrl = this.getFullUrl(url);
-
-    // 기본 헤더와 사용자 헤더 병합
-    const mergedHeaders = {
-      "Content-Type": "application/json",
-      ...this.defaultHeaders,
-      ...(headers || {}),
-    };
-
-    const response = await fetch(fullUrl, {
-      method: "POST",
-      headers: mergedHeaders,
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP 에러: ${response.status}`);
-    }
-
-    return response.json() as Promise<T>;
-  }
-
-  async put<T = any, D = any>(
-    url: string,
-    body?: D,
-    headers?: Headers
-  ): Promise<T> {
-    const fullUrl = this.getFullUrl(url);
-
-    const mergedHeaders = {
-      "Content-Type": "application/json",
-      ...this.defaultHeaders,
-      ...(headers || {}),
-    };
-
-    const response = await fetch(fullUrl, {
-      method: "PUT",
-      headers: mergedHeaders,
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP 에러: ${response.status}`);
-    }
-
-    return response.json() as Promise<T>;
-  }
-
-  async delete<T = any>(url: string, headers?: Headers): Promise<T> {
-    const fullUrl = this.getFullUrl(url);
-
-    const mergedHeaders = {
-      ...this.defaultHeaders,
-      ...(headers || {}),
-    };
-
-    const response = await fetch(fullUrl, {
-      method: "DELETE",
-      headers: mergedHeaders,
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP 에러: ${response.status}`);
-    }
-
-    return response.json() as Promise<T>;
-  }
-
-  async patch<T = any, D = any>(
-    url: string,
-    body?: D,
-    headers?: Headers
-  ): Promise<T> {
-    const fullUrl = this.getFullUrl(url);
-
-    const mergedHeaders = {
-      "Content-Type": "application/json",
-      ...this.defaultHeaders,
-      ...(headers || {}),
-    };
-
-    const response = await fetch(fullUrl, {
-      method: "PATCH",
-      headers: mergedHeaders,
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP 에러: ${response.status}`);
-    }
-
-    return response.json() as Promise<T>;
+    return `${trimmedBaseURL}/${trimmedUrl}`;
   }
 
   async request<T = any>(
@@ -146,21 +29,65 @@ class Fetson implements FetsonInstance {
     body?: any,
     headers?: Headers
   ): Promise<T> {
-    // 메서드에 따라 적절한 함수 호출
-    switch (method) {
-      case "GET":
-        return this.get<T>(url, headers);
-      case "POST":
-        return this.post<T>(url, body, headers);
-      case "PUT":
-        return this.put<T>(url, body, headers);
-      case "DELETE":
-        return this.delete<T>(url, headers);
-      case "PATCH":
-        return this.patch<T>(url, body, headers);
-      default:
-        return this.get<T>(url, headers); // 기본적으로 GET 요청 처리
+    const fullUrl = this.getFullUrl(url);
+
+    const mergedHeaders = {
+      ...this.defaultHeaders,
+      ...headers,
+    };
+
+    if (body) {
+      mergedHeaders["Content-Type"] = "application/json";
     }
+
+    const response = await fetch(fullUrl, {
+      method,
+      headers: mergedHeaders,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+
+    if (!response.ok) {
+      throw new HttpError(response);
+    }
+
+    // DELETE와 같이 본문이 없는 응답 처리
+    if (response.status === 204 || method === "DELETE") {
+      return Promise.resolve() as Promise<T>;
+    }
+
+    return response.json() as Promise<T>;
+  }
+
+  async get<T = any>(url: string, headers?: Headers): Promise<T> {
+    return this.request<T>("GET", url, undefined, headers);
+  }
+
+  async post<T = any, D = any>(
+    url: string,
+    body?: D,
+    headers?: Headers
+  ): Promise<T> {
+    return this.request<T>("POST", url, body, headers);
+  }
+
+  async put<T = any, D = any>(
+    url: string,
+    body?: D,
+    headers?: Headers
+  ): Promise<T> {
+    return this.request<T>("PUT", url, body, headers);
+  }
+
+  async delete<T = any>(url: string, headers?: Headers): Promise<T> {
+    return this.request<T>("DELETE", url, undefined, headers);
+  }
+
+  async patch<T = any, D = any>(
+    url: string,
+    body?: D,
+    headers?: Headers
+  ): Promise<T> {
+    return this.request<T>("PATCH", url, body, headers);
   }
 }
 
